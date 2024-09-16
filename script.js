@@ -75,6 +75,7 @@ const CourseInfo = {
       }
     }
   ];
+
   
   //REQUIRED OUTPUT
 //   function getLearnerData(course, ag, submissions) {
@@ -101,3 +102,36 @@ const CourseInfo = {
   
 //   console.log(result);
 
+
+// DEPENDENCIES
+// get values of unique learner ids from learner submission data
+// course id in assignment group has to match id in course info. if not, throw an error.
+// assignment id in learner has to match assignment object in assignment group
+// if assignment due date is after/on submission date, add assignment id to learner data assignment scores + avg scores. else, ignore.
+// if assignment due date is before submission date, minus 10% of points possible from that assignment.
+// for each learner, total scores AND possible scores for all assignments to get weighted average score - 'avg'.
+    // e.g. a learner with 50/100 on one assignment and 190/200 on another would have a weighted average score of 240/300 = 80%.
+// score relevant to assignment id in learner submissions has to match points_possible key in assignment object in assigment group
+// account for exception handling:
+  // What if points_possible is 0? You cannot divide by zero.
+  // What if a value that you are expecting to be a number is instead a string? 
+
+
+  const allLearners = [] //allocate memory for array of learner objects in final output
+  let learnerData = {}; //allocate memory for learner object in final output
+
+  getLearnerID(LearnerSubmissions);
+  console.log(allLearners)
+//HELPER FUNCTIONS
+
+  function getLearnerID(submissions) { //get values of unique learner ids from submission data
+    let uniqueLearnerID = []; //store unique id numbers
+    for (let i of submissions) { // for each obj in submissions...
+        if (uniqueLearnerID.indexOf(i.learner_id) == -1) { //if ID value is not in uniqueLearnerID
+            uniqueLearnerID.push (i.learner_id); //get value of learner_id and push to uniqueLearnerID for subsequent comparisons
+            learnerData.id = i.learner_id; //create learner data object with id key and learner_id value
+            allLearners.push(learnerData) //push key-value pair to allLearners parent array
+            learnerData = {}; //clear learnerData object for next iteration
+        } else continue; //if ID value already in uniqueLearnerID, continue loop to search for unique ids
+    }
+  }
