@@ -104,14 +104,9 @@ const CourseInfo = {
 
 
 // DEPENDENCIES
-// get values of unique learner ids from learner submission data
+
 // course id in assignment group has to match id in course info. if not, throw an error.
-// assignment id in learner has to match assignment object in assignment group
-// if assignment due date is after/on submission date, add assignment id to learner data assignment scores + avg scores. else, ignore.
-// if assignment due date is before submission date, minus 10% of points possible from that assignment.
-// for each learner, total scores AND possible scores for all assignments to get weighted average score - 'avg'.
-    // e.g. a learner with 50/100 on one assignment and 190/200 on another would have a weighted average score of 240/300 = 80%.
-// score relevant to assignment id in learner submissions has to match points_possible key in assignment object in assigment group
+
 // account for exception handling:
   // What if points_possible is 0? You cannot divide by zero.
   // What if a value that you are expecting to be a number is instead a string? 
@@ -122,7 +117,9 @@ const CourseInfo = {
 
   getLearnerID(LearnerSubmissions);
   console.log(allLearners)
-//HELPER FUNCTIONS
+  
+  getAssignmentScore(AssignmentGroup,LearnerSubmissions)
+//FUNCTIONS
 
   function getLearnerID(submissions) { //get values of unique learner ids from submission data
     let uniqueLearnerID = []; //store unique id numbers
@@ -134,4 +131,58 @@ const CourseInfo = {
             learnerData = {}; //clear learnerData object for next iteration
         } else continue; //if ID value already in uniqueLearnerID, continue loop to search for unique ids
     }
+    return uniqueLearnerID
   }
+
+
+  function getAvgScore(assignments,submissions) {
+// for each learner, total scores AND possible scores for all assignments to get weighted average score - 'avg'.
+    // e.g. a learner with 50/100 on one assignment and 190/200 on another would have a weighted average score of 240/300 = 80%.
+    getAssignmentScore(assignments,submissions)
+
+  }
+
+  //HELPER FUNCTIONS
+  function getAssignmentScore(assignmentGrp,submissions) { // get score in learner submission/points_possible for each assignment
+    
+     
+    
+    function assignmentDueDate(assignmentGrp){
+        let assignmentKey = []
+        let dueDate = []
+        for (assignment of assignmentGrp.assignments) {
+            assignmentKey.push(assignment.id); //save assignment id to array for later use
+            dueDate.push(assignment.due_at); //save duedate to array for later use
+        }
+        let dueDateobj = {}
+        for (let i = 0; i < assignmentKey.length; i++) { //create object with assignment id as keys and due date as values.
+            dueDateobj[assignmentKey[i]] = dueDate[i]; 
+        }
+        return dueDateobj
+    }
+
+    function submissionDatebyLearner(submissions){
+        getLearnerID(submissions) //match learner id to assignment id and submission date
+        let assignmentKey = []
+        let submitDate = []
+        
+        
+        }
+        for (submission of submissions) {
+            assignmentKey.push(submission.assignment_id); //save assignment id to array for later use
+            submitDate.push(submission.submission.submitted_at); //save submitdate to array for later use
+        }
+        let submitDateobj = {}
+        for (let i = 0; i < assignmentKey.length; i++) { //create object with assignment id as keys and due date as values.
+            submitDateobj[assignmentKey[i]] = submitDate[i]; 
+        }
+        return submitDateobj
+    }
+
+    console.log(submissionDate(LearnerSubmissions));
+
+
+// if assignment due date is after/on submission date, add assignment id to learner data assignment scores + avg scores. else, ignore.
+// if assignment due date is before submission date, minus 10% of points possible from that assignment.
+// score relevant to assignment id in learner submissions has to match points_possible key in assignment object in assigment group
+  
