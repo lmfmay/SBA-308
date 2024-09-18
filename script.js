@@ -162,6 +162,12 @@ const CourseInfo = {
     }
 
     function submissionDatebyLearner(submissions){
+        // for each unique ID in unique learner id,
+        //for submission of learnerSubmissions
+        // if submission.learner_id == unique id
+            // get assignment id, get submission date, get score. (create variables to save each value)
+
+        
         getLearnerID(submissions) //match learner id to assignment id and submission date
         let assignmentKey = []
         let submitDate = []
