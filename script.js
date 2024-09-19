@@ -143,7 +143,7 @@ const CourseInfo = {
   }
 
   //HELPER FUNCTIONS
-  function getAssignmentScore(assignmentGrp,submissions) { // get score in learner submission/points_possible for each assignment
+  function getAssignmentScore(assignmentGrp,submissions) {} // get score in learner submission/points_possible for each assignment
     
      
     
@@ -161,34 +161,33 @@ const CourseInfo = {
         return dueDateobj
     }
 
-    function submissionDatebyLearner(submissions){
-        // for each unique ID in unique learner id,
-        //for submission of learnerSubmissions
-        // if submission.learner_id == unique id
-            // get assignment id, get submission date, get score. (create variables to save each value)
-
-        
-        getLearnerID(submissions) //match learner id to assignment id and submission date
-        let assignmentKey = []
-        let submitDate = []
-        
-        
+    function submissionsbyLearner(submissions){        
+        let learner = getLearnerID(submissions); //get list of unique learner IDs
+        let submissionsByID = {}; //assignments and submission dates of each learner
+        for (id of learner){ //for each learner, create key-value of assignments:submission date
+            submissionsByID[id] = {};//create object with id value as key
+            for (submission of submissions) {
+                if (submission.learner_id == id){ //if submission matches unique id
+                    submissionsByID[id][submission.assignment_id] = submission.submission.submitted_at; //add submission date to assignment key and add key-value pair to id key
+                } else continue;   
+            }      
         }
-        for (submission of submissions) {
-            assignmentKey.push(submission.assignment_id); //save assignment id to array for later use
-            submitDate.push(submission.submission.submitted_at); //save submitdate to array for later use
-        }
-        let submitDateobj = {}
-        for (let i = 0; i < assignmentKey.length; i++) { //create object with assignment id as keys and due date as values.
-            submitDateobj[assignmentKey[i]] = submitDate[i]; 
-        }
-        return submitDateobj
+        return submissionsByID
     }
+        
 
-    console.log(submissionDate(LearnerSubmissions));
+        
+        
+        // let submitDateobj = {}
+        // for (let i = 0; i < assignmentKey.length; i++) { //create object with assignment id as keys and due date as values.
+        //     submitDateobj[assignmentKey[i]] = submitDate[i]; 
+        // }
+        // return submitDateobj
+    
+
+
 
 
 // if assignment due date is after/on submission date, add assignment id to learner data assignment scores + avg scores. else, ignore.
 // if assignment due date is before submission date, minus 10% of points possible from that assignment.
 // score relevant to assignment id in learner submissions has to match points_possible key in assignment object in assigment group
-  
