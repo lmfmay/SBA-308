@@ -111,71 +111,163 @@ const CourseInfo = {
   // What if points_possible is 0? You cannot divide by zero.
   // What if a value that you are expecting to be a number is instead a string? 
 
-
-  const allLearners = [] //allocate memory for array of learner objects in final output
-  let learnerData = {}; //allocate memory for learner object in final output
-
-  getLearnerID(LearnerSubmissions);
-  console.log(allLearners)
-  
-  getAssignmentScore(AssignmentGroup,LearnerSubmissions)
-//FUNCTIONS
-
-  function getLearnerID(submissions) { //get values of unique learner ids from submission data
-    let uniqueLearnerID = []; //store unique id numbers
-    for (let i of submissions) { // for each obj in submissions...
-        if (uniqueLearnerID.indexOf(i.learner_id) == -1) { //if ID value is not in uniqueLearnerID
-            uniqueLearnerID.push (i.learner_id); //get value of learner_id and push to uniqueLearnerID for subsequent comparisons
-            learnerData.id = i.learner_id; //create learner data object with id key and learner_id value
-            allLearners.push(learnerData) //push key-value pair to allLearners parent array
-            learnerData = {}; //clear learnerData object for next iteration
-        } else continue; //if ID value already in uniqueLearnerID, continue loop to search for unique ids
+function getLearnerData(course, ag, submissions) {
+  let allLearners = [];
+  let learnerData = {};
+// catch error if course ID in assignment group doesn't match course info.
+  try {
+    if(course.id !== ag.course_id){
+      throw (`Assignment group does not belong to Course ID`)
     }
-    return uniqueLearnerID
+  } catch (error) {console.log(error)}
+
+//Transform learner submission data to learner objects.
+  for (let sub of submissions) {  
+    if (!allLearners.some(el => el.id == sub.learner_id)){ //if learner doesn't exist
+        learnerData.id = sub.learner_id;
+        learnerData[sub.assignment_id]=sub.submission.score;
+        allLearners.push(learnerData);
+        learnerData = {};
+      } else{ //if learner exists
+        allLearners.forEach((learner) => { 
+          if (learner.id == sub.learner_id){
+            learner[sub.assignment_id] = sub.submission.score;
+          }
+        }); 
+      }
   }
 
+// for each learner, get assignment submission date
+    let submissionsDateAll = []; //assignments and submission dates of all learners
+    let submissionsDate = {}; //assignments and submission dates of each learner
+    allLearners.forEach((learner) => { 
+      submissions.forEach(submission => {
+        if (learner.id == submission.learner_id){
+          submissionsDate.id = learner.id;
+          submissionsDate[submission.assignment_id] = submission.submission.submitted_at;
+        }
+      })
+      submissionsDateAll.push(submissionsDate);
+      submissionsDate = {}
+    });
+        
+    console.log(submissionsDateAll)
 
-  function getAvgScore(assignments,submissions) {
-// for each learner, total scores AND possible scores for all assignments to get weighted average score - 'avg'.
-    // e.g. a learner with 50/100 on one assignment and 190/200 on another would have a weighted average score of 240/300 = 80%.
-    getAssignmentScore(assignments,submissions)
+// for each assignment, get due date
+    let dueDate = {};
+    ag.assignments.forEach(element => {
+      dueDate[element.id] = element.due_at
+    });
+    console.log(dueDate)
 
-  }
 
-  //HELPER FUNCTIONS
-  function getAssignmentScore(assignmentGrp,submissions) {} // get score in learner submission/points_possible for each assignment
+
+// for each assignment, get points possible
+    let pointsPossible = {};
+    ag.assignments.forEach(element => {
+      pointsPossible[element.id] = element.points_possible
+    });
+    console.log(pointsPossible)
+
+// for each learner, compare due date and submission date
+// submission > due = penalty
+// submission <= due = nothing happens
+for (let i = 1; i < Object.keys(dueDate).length; i++) {
+  allLearners.forEach((learner) => {
+    submissionsDateAll.forEach(submission => {
+      
+        if (submission[i] > dueDate[i]){
+          learner[i] -= (pointsPossible[i]*0.1);
+        } 
+        
+      });
+    })
+};
+return allLearners;
+}
+console.log(getLearnerData(CourseInfo,AssignmentGroup,LearnerSubmissions))
+
+  //const allLearners = [] //allocate memory for array of learner objects in final output
+//   let learnerData = {}; //allocate memory for learner object in final output
+
+//   let uniqueIDs = getLearnerID(LearnerSubmissions);
+//   // console.log(allLearners)
+  
+//   getAssignmentScore(AssignmentGroup,LearnerSubmissions)
+// //FUNCTIONS
+
+//   function getLearnerID(submissions) { //get values of unique learner ids from submission data
+//     let uniqueLearnerID = []; //store unique id numbers
+//     for (let i of submissions) { // for each obj in submissions...
+//         if (uniqueLearnerID.indexOf(i.learner_id) == -1) { //if ID value is not in uniqueLearnerID
+//             uniqueLearnerID.push (i.learner_id); //get value of learner_id and push to uniqueLearnerID for subsequent comparisons
+//             learnerData.id = i.learner_id; //create learner data object with id key and learner_id value
+//             allLearners.push(learnerData) //push key-value pair to allLearners parent array
+//             learnerData = {}; //clear learnerData object for next iteration
+//         } else continue; //if ID value already in uniqueLearnerID, continue loop to search for unique ids
+//     }
+//     return uniqueLearnerID
+//   }
+
+
+//   function getAvgScore(assignments,submissions) {
+// // for each learner, total scores AND possible scores for all assignments to get weighted average score - 'avg'.
+//     // e.g. a learner with 50/100 on one assignment and 190/200 on another would have a weighted average score of 240/300 = 80%.
+//     getAssignmentScore(assignments,submissions)
+
+//   }
+
+//   //HELPER FUNCTIONS
+//   function getAssignmentScore(assignmentGrp,submissions) {} // get score in learner submission/points_possible for each assignment
     
      
     
-    function assignmentDueDate(assignmentGrp){
-        let assignmentKey = []
-        let dueDate = []
-        for (assignment of assignmentGrp.assignments) {
-            assignmentKey.push(assignment.id); //save assignment id to array for later use
-            dueDate.push(assignment.due_at); //save duedate to array for later use
-        }
-        let dueDateobj = {}
-        for (let i = 0; i < assignmentKey.length; i++) { //create object with assignment id as keys and due date as values.
-            dueDateobj[assignmentKey[i]] = dueDate[i]; 
-        }
-        return dueDateobj
-    }
+//     function assignmentDueDate(assignmentGrp){
+//         let assignmentKey = []
+//         let dueDate = []
+//         for (assignment of assignmentGrp.assignments) {
+//             assignmentKey.push(assignment.id); //save assignment id to array for later use
+//             dueDate.push(assignment.due_at); //save duedate to array for later use
+//         }
+//         let dueDateobj = {}
+//         for (let i = 0; i < assignmentKey.length; i++) { //create object with assignment id as keys and due date as values.
+//             dueDateobj[assignmentKey[i]] = dueDate[i]; 
+//         }
+//         return dueDateobj
+//     }
+//     // console.log(assignmentDueDate(AssignmentGroup));
 
-    function submissionsbyLearner(submissions){        
-        let learner = getLearnerID(submissions); //get list of unique learner IDs
-        let submissionsByID = {}; //assignments and submission dates of each learner
-        for (id of learner){ //for each learner, create key-value of assignments:submission date
-            submissionsByID[id] = {};//create object with id value as key
-            for (submission of submissions) {
-                if (submission.learner_id == id){ //if submission matches unique id
-                    submissionsByID[id][submission.assignment_id] = submission.submission.submitted_at; //add submission date to assignment key and add key-value pair to id key
-                } else continue;   
-            }      
-        }
-        return submissionsByID
-    }
-        
+//     function submissionsbyLearner(uniqueIDs,submissions){       
+//         //let learner = getLearnerID(submissions); //get list of unique learner IDs
+//         let submissionsByID = {}; //assignments and submission dates of each learner
+//         for (id of uniqueIDs){ //for each learner, create key-value of assignments:submission date
+//             submissionsByID[id] = {};//create object with id value as key
+//             for (submission of submissions) {
+//                 if (submission.learner_id == id){ //if submission matches unique id
+//                     submissionsByID[id][submission.assignment_id] = submission.submission.submitted_at; //add submission date to assignment key and add key-value pair to id key
+//                 } else continue;   
+//             }      
+//         }
+//         return submissionsByID
+//     }
 
+    // console.log(submissionsbyLearner(uniqueIDs,LearnerSubmissions));
+
+
+
+    // function isLate (submissionsbyLearner,assignmentDueDate) {
+    //     for (const key in assignmentDueDate) {
+    //         if (key == )
+    //     }
+
+        // assign array to log assignment with id, due date and points keyvalue pairs.
+        // for each obj, add new key value pair. obj.penalty = 'obj.points_possible*0.1
+        // for each obj in submissionsbyID
+
+            // if obj.due_at < submissionsbyID
+        // if assignment due date is before submission date, minus 10% of points possible from that assignment.
+    //}
+// console.log(isLate(submissionsbyLearner(uniqueIDs,LearnerSubmissions),assignmentDueDate(AssignmentGroup)))
         
         
         // let submitDateobj = {}
@@ -188,6 +280,5 @@ const CourseInfo = {
 
 
 
-// if assignment due date is after/on submission date, add assignment id to learner data assignment scores + avg scores. else, ignore.
-// if assignment due date is before submission date, minus 10% of points possible from that assignment.
+
 // score relevant to assignment id in learner submissions has to match points_possible key in assignment object in assigment group
