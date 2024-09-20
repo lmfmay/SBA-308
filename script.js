@@ -76,48 +76,33 @@ const CourseInfo = {
     }
   ];
 
-// MAIN PROGRAMME
-
+// -----------------------------MAIN PROGRAMME-------------------------------------
 console.log(getLearnerData(CourseInfo,AssignmentGroup,LearnerSubmissions))
 
+// ----------------------------MAIN FUNCTION---------------------------------------
 function getLearnerData(course, ag, submissions) {
   let allLearners = [];
-  let learnerData = {};
-// catch error if course ID in assignment group doesn't match course info.
-  try {
-    if(course.id !== ag.course_id){
-      throw (`Assignment group does not belong to Course ID`)
-    }
-  } catch (error) {console.log(error)}
+  //let learnerData = {};
 
-//Transform learner submission data to learnerData objects.
-  for (let sub of submissions) {  
-    if (!allLearners.some(el => el.id == sub.learner_id)){ //if learner doesn't exist
-        learnerData.id = sub.learner_id; //create id key-value pair
-        learnerData[sub.assignment_id]=sub.submission.score; //create assignment score key-value pair
-        allLearners.push(learnerData); // push id and assignment score to main array
-        learnerData = {}; //clear for next new learner
-      } else{ 
-        allLearners.forEach((learner) => { 
-          if (learner.id == sub.learner_id){ //if learner id key-value already exsists
-            learner[sub.assignment_id] = sub.submission.score; //create assignment score key-value in learner object
-          }
-        }); 
+// catch error if course ID in assignment group doesn't match course info.
+  isCourseID(course,ag);
+
+// categorize assignment scores by learner ID
+  submissionsByLearners(allLearners, submissions)
+
+// categorize assignment submission dates by learner id
+  let submissionsDateAll = []; //assignments and submission dates of all learners
+  let submissionsDate = {}; //assignments and submission dates of each learner
+  allLearners.forEach((learner) => { 
+    submissions.forEach(submission => { //iterates through learner submissions database
+      if (learner.id == submission.learner_id){ //if learner id matches submission
+        submissionsDate.id = learner.id; // create id key-value in learner submission object
+        submissionsDate[submission.assignment_id] = submission.submission.submitted_at; //create assignment submission date key-value in learner submission object 
       }
-  }
-// for each learner, get assignment submission date
-    let submissionsDateAll = []; //assignments and submission dates of all learners
-    let submissionsDate = {}; //assignments and submission dates of each learner
-    allLearners.forEach((learner) => { 
-      submissions.forEach(submission => { //iterates through learner submissions database
-        if (learner.id == submission.learner_id){ //if learner id matches submission
-          submissionsDate.id = learner.id; // create id key-value in learner submission object
-          submissionsDate[submission.assignment_id] = submission.submission.submitted_at; //create assignment submission date key-value in learner submission object 
-        }
-      })
-      submissionsDateAll.push(submissionsDate); //Push submission data to array
-      submissionsDate = {} //clear for next learner
-    });
+    })
+    submissionsDateAll.push(submissionsDate); //Push submission data to array
+    submissionsDate = {} //clear for next learner
+  });
         
 
 // for each assignment, get due date
@@ -192,11 +177,37 @@ for (let i = 1; i < Object.keys(dueDate).length; i++) { //for each assignment
 }
 
 
-//HELPER FUNCTIONS
+//------------------------HELPER FUNCTIONS---------------------------
+// catch error if course ID in assignment group doesn't match course info.
+function isCourseID(course,ag) {
+  try {
+    if(course.id !== ag.course_id){
+      throw (`Assignment group does not belong to Course ID`)
+    }
+  } catch (error) {console.log(error)}
+}
+
+// categorize assignment scores by learner ID
+function submissionsByLearners(allLearners, submissions) {
+  let learnerData = {};
+  for (let sub of submissions) {  
+    if (!allLearners.some(el => el.id == sub.learner_id)){ //if learner doesn't exist
+        learnerData.id = sub.learner_id; //create id key-value pair
+        learnerData[sub.assignment_id]=sub.submission.score; //create assignment score key-value pair
+        allLearners.push(learnerData); // push id and assignment score to main array
+        learnerData = {}; //clear for next new learner
+      } else{ 
+        allLearners.forEach((learner) => { 
+          if (learner.id == sub.learner_id){ //if learner id key-value already exsists
+            learner[sub.assignment_id] = sub.submission.score; //create assignment score key-value in learner object
+          }
+        }); 
+      }
+  }  
+}
 
 
-
-//EXPECTED RESULTS
+//------------------------EXPECTED RESULTS--------------------------
 // const result = [
 //   {
 //     id: 125,
