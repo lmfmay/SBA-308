@@ -174,12 +174,12 @@ function getLearnerData(course, ag, submissions) {
     
     console.log(dueDate)
 
-
-
 // for each assignment, get points possible
     let pointsPossible = {};
     ag.assignments.forEach(element => {
-      pointsPossible[element.id] = element.points_possible
+      if (element.due_at < currentDate){
+        pointsPossible[element.id] = element.points_possible
+      }
     });
     console.log(pointsPossible)
 
@@ -198,10 +198,22 @@ for (let i = 1; i < Object.keys(dueDate).length; i++) {
 };
 
 
-
 // get weighted avg for each learner
-// for each learner, total scores AND possible scores for all assignments to get weighted average score - 'avg'.
+// for each learner, total scores AND possible scores for all assignments to get weighted average score.
     // e.g. a learner with 50/100 on one assignment and 190/200 on another would have a weighted average score of 240/300 = 80%.
+    let learnerSum = 0;
+    let possibleSum = 0;
+    allLearners.forEach((learner) => {
+      Object.keys(pointsPossible).forEach(key => {
+        possibleSum += pointsPossible[key];
+      });
+      for (let i = 1; i < Object.keys(learner).length; i++) {
+        learnerSum += learner[i];
+      } 
+      learner.avg = learnerSum/possibleSum;
+      learnerSum = 0;
+      possibleSum = 0;
+      })
     
 
 // [
@@ -210,11 +222,11 @@ for (let i = 1; i < Object.keys(dueDate).length; i++) {
 // ]
 
 // get ratio of learner scores/possible_points
-for (let i = 1; i < Object.keys(dueDate).length; i++) {
-  allLearners.forEach(learner => {
-    learner[i] /= pointsPossible[i]
-});
-}
+// for (let i = 1; i < Object.keys(dueDate).length; i++) {
+//   allLearners.forEach(learner => {
+//     learner[i] /= pointsPossible[i]
+// });
+// }
 
 return allLearners;
 }
