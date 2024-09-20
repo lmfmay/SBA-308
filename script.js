@@ -155,9 +155,23 @@ function getLearnerData(course, ag, submissions) {
 
 // for each assignment, get due date
     let dueDate = {};
+    const date = new Date()
+    let day = date.getDate();
+    let month = date.getMonth() + 1;
+    let year = date.getFullYear();
+
+    // This arrangement can be altered based on how we want the date's format to appear.
+    let currentDate = `${year}-${month}-${day}`;
+   
     ag.assignments.forEach(element => {
-      dueDate[element.id] = element.due_at
+      dueDate[element.id] = element.due_at;
+      if (element.due_at > currentDate){
+        allLearners.forEach(learner => {
+          delete learner[element.id];
+        });
+      }
     });
+    
     console.log(dueDate)
 
 
@@ -172,17 +186,36 @@ function getLearnerData(course, ag, submissions) {
 // for each learner, compare due date and submission date
 // submission > due = penalty
 // submission <= due = nothing happens
+
 for (let i = 1; i < Object.keys(dueDate).length; i++) {
   allLearners.forEach((learner) => {
-    submissionsDateAll.forEach(submission => {
-      
-        if (submission[i] > dueDate[i]){
+    submissionsDateAll.forEach(submission => {      
+        if (submission.id == learner.id && submission[i] > dueDate[i]){
           learner[i] -= (pointsPossible[i]*0.1);
-        } 
-        
+        }         
       });
     })
 };
+
+
+
+// get weighted avg for each learner
+// for each learner, total scores AND possible scores for all assignments to get weighted average score - 'avg'.
+    // e.g. a learner with 50/100 on one assignment and 190/200 on another would have a weighted average score of 240/300 = 80%.
+    
+
+// [
+//   { '1': 47, '2': 135, '3': 400, id: 125 },
+//   { '1': 39, '2': 125, id: 132 }
+// ]
+
+// get ratio of learner scores/possible_points
+for (let i = 1; i < Object.keys(dueDate).length; i++) {
+  allLearners.forEach(learner => {
+    learner[i] /= pointsPossible[i]
+});
+}
+
 return allLearners;
 }
 console.log(getLearnerData(CourseInfo,AssignmentGroup,LearnerSubmissions))
