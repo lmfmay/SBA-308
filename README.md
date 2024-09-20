@@ -4,8 +4,18 @@ This project applies fundamental JavaScript concepts in a practical manner. My g
 
 
 ### The following requirements are part of this assessment:
-
-
+- Declare variables properly using let and const where appropriate.
+- Use operators to perform calculations on variables and literals.
+- Use strings, numbers, and Boolean values cached within variables.
+- Use at least two if/else statements to control program flow.
+- Use try/catch statements to manage potential errors in the code, such as incorrectly formatted or typed data being fed into your program.
+- Utilize at least two different types of loops.
+- Utilize at least one loop control keyword such as break or continue.
+- Create and/or manipulate arrays and objects.
+- Demonstrate the retrieval, manipulation, and removal of items in an array or properties in an object.
+- Use functions to handle repeated tasks.
+- Program outputs processed data as intended.
+- Program runs without errors.
 
 ## Technologies used
 - JavaScript
@@ -19,5 +29,5 @@ This project applies fundamental JavaScript concepts in a practical manner. My g
     - **git remote -v # confirm the changes**
 
 ## Acknowledgements
-**Code snippets:**
-- 
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Date/getDate
+- https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
